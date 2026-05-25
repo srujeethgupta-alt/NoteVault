@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -20,15 +21,15 @@ app.use("/api/notes", notesRoutes);
 app.use("/api/health", healthRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  console.log("__dirname:", __dirname);
-  console.log("dist path:", path.join(__dirname, "../../frontend/dist"));
-  // Serve frontend build when present. __dirname is backend/src, so
-  // ../../frontend/dist resolves to <repo-root>/frontend/dist
   const distPath = path.join(__dirname, "../../frontend/dist");
-  app.use(express.static(distPath));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
-  });
+  const indexHtml = path.join(distPath, "index.html");
+
+  if (fs.existsSync(indexHtml)) {
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(indexHtml);
+    });
+  }
 }
 
 module.exports = app;

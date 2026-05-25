@@ -61,6 +61,8 @@ gh repo create notevault --public --push
 3. Select your repository
 4. Railway auto-detects Node.js
 
+> If you only want to deploy the backend, set the project root to `backend` and use `npm install` as the build command with `npm start` as the start command.
+
 ### Step 3: Set environment variables in Railway dashboard
 ```
 JWT_SECRET=your_super_long_random_secret_here_min_32_chars
