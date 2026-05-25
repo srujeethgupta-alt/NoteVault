@@ -22,9 +22,12 @@ app.use("/api/health", healthRoutes);
 if (process.env.NODE_ENV === "production") {
   console.log("__dirname:", __dirname);
   console.log("dist path:", path.join(__dirname, "../../frontend/dist"));
-  app.use(express.static(path.join(__dirname, "../../../frontend/dist")));
+  // Serve frontend build when present. __dirname is backend/src, so
+  // ../../frontend/dist resolves to <repo-root>/frontend/dist
+  const distPath = path.join(__dirname, "../../frontend/dist");
+  app.use(express.static(distPath));
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../../../frontend/dist/index.html"));
+    res.sendFile(path.join(distPath, "index.html"));
   });
 }
 

@@ -6,6 +6,6 @@
     "dev:backend": "cd backend && cp .env.example .env && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "start": "cd backend && NODE_ENV=production node server.js"
+    "start": "npm run build && cd backend && NODE_ENV=production node server.js"
   }
 }
