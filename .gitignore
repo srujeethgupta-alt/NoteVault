@@ -3,5 +3,6 @@ backend/node_modules/
 frontend/node_modules/
 backend/.env
 backend/app.db
+backend/app.json
 frontend/dist
 .DS_Store

@@ -27,6 +27,6 @@ npm start
 
 ## Notes
 
-- The backend uses SQLite (`app.db`) by default.
+- The backend uses a local JSON datastore (`app.json`) instead of SQLite.
 - On Railway, local disk is not guaranteed to persist across redeploys. For production you should migrate to a hosted database such as PostgreSQL.
 - If you deploy backend-only and do not include frontend assets, only the API routes will be available.

@@ -1,14 +1,18 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const db = require("../db");
+const {
+  getUserByEmail,
+  getUserById,
+  createUser,
+} = require("../db");
 const authenticate = require("../middleware/authenticate");
 
 const router = express.Router();
 const JWT_SECRET =
   process.env.JWT_SECRET || "supersecret_change_in_production_123";
 
-router.post("/signup", (req, res) => {
+router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -22,32 +26,32 @@ router.post("/signup", (req, res) => {
   }
 
   const normalizedEmail = email.toLowerCase().trim();
-  const existing = db
-    .prepare("SELECT id FROM users WHERE email = ?")
-    .get(normalizedEmail);
+  const existing = await getUserByEmail(normalizedEmail);
 
   if (existing) {
     return res.status(409).json({ error: "Email already registered" });
   }
 
   const hashed = bcrypt.hashSync(password, 12);
-  const result = db
-    .prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)")
-    .run(name, normalizedEmail, hashed);
+  const user = await createUser({
+    name,
+    email: normalizedEmail,
+    password: hashed,
+  });
 
   const token = jwt.sign(
-    { id: result.lastInsertRowid, email: normalizedEmail, name },
+    { id: user.id, email: normalizedEmail, name },
     JWT_SECRET,
     { expiresIn: "7d" }
   );
 
   return res.status(201).json({
     token,
-    user: { id: result.lastInsertRowid, name, email: normalizedEmail },
+    user: { id: user.id, name, email: normalizedEmail },
   });
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -57,9 +61,7 @@ router.post("/login", (req, res) => {
   }
 
   const normalizedEmail = email.toLowerCase().trim();
-  const user = db
-    .prepare("SELECT * FROM users WHERE email = ?")
-    .get(normalizedEmail);
+  const user = await getUserByEmail(normalizedEmail);
 
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(401).json({ error: "Invalid email or password" });
@@ -77,16 +79,19 @@ router.post("/login", (req, res) => {
   });
 });
 
-router.get("/me", authenticate, (req, res) => {
-  const user = db
-    .prepare("SELECT id, name, email, created_at FROM users WHERE id = ?")
-    .get(req.user.id);
+router.get("/me", authenticate, async (req, res) => {
+  const user = await getUserById(req.user.id);
 
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
 
-  return res.json({ user });
+  return res.json({ user: {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    created_at: user.created_at,
+  } });
 });
 
 module.exports = router;
