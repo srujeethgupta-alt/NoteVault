@@ -20,10 +20,12 @@ app.use("/api/notes", notesRoutes);
 app.use("/api/health", healthRoutes);
 
 if (process.env.NODE_ENV === "production") {
+  console.log("__dirname:", __dirname);
+  console.log("dist path:", path.join(__dirname, "../../frontend/dist"));
   app.use(express.static(path.join(__dirname, "../../../frontend/dist")));
   app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../../frontend/dist/index.html"));
-});
+    res.sendFile(path.join(__dirname, "../../../frontend/dist/index.html"));
+  });
 }
 
 module.exports = app;
