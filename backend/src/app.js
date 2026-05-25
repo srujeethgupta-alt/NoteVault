@@ -29,7 +29,21 @@ if (process.env.NODE_ENV === "production") {
     app.get("*", (req, res) => {
       res.sendFile(indexHtml);
     });
+  } else {
+    app.get("/", (req, res) => {
+      res.json({
+        status: "NoteVault backend only",
+        message: "Frontend build not found. Use /api/auth, /api/notes, and /api/health.",
+      });
+    });
   }
+} else {
+  app.get("/", (req, res) => {
+    res.json({
+      status: "NoteVault backend",
+      message: "Backend is running. In development, start the frontend separately.",
+    });
+  });
 }
 
 module.exports = app;
